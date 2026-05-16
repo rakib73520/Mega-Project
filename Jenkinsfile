@@ -1,6 +1,6 @@
 @Library('Shared') _
 pipeline {
-    agent {label 'Node'} # agent any; if you are running Jenkins on one (master) machine
+    agent any # agent any; if you are running Jenkins on one (master) machine
     
     environment{
         SONAR_HOME = tool "Sonar"
@@ -32,7 +32,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script{
-                    code_checkout("https://github.com/bongodev/mega.git","main")
+                    code_checkout("https://github.com/rakib73520/Mega-Project.git","main")
                 }
             }
         }
@@ -97,11 +97,11 @@ pipeline {
             steps{
                 script{
                         dir('backend'){
-                            docker_build("mega-backend-beta","${params.BACKEND_DOCKER_TAG}","bongodev")
+                            docker_build("mega-project-backend","${params.BACKEND_DOCKER_TAG}","rakib73520")
                         }
                     
                         dir('frontend'){
-                            docker_build("mega-frontend-beta","${params.FRONTEND_DOCKER_TAG}","bongodev")
+                            docker_build("mega-project-frontend","${params.FRONTEND_DOCKER_TAG}","rakib73520")
                         }
                 }
             }
@@ -110,8 +110,8 @@ pipeline {
         stage("Docker: Push to DockerHub"){
             steps{
                 script{
-                    docker_push("mega-backend-beta","${params.BACKEND_DOCKER_TAG}","bongodev") 
-                    docker_push("mega-frontend-beta","${params.FRONTEND_DOCKER_TAG}","bongodev")
+                    docker_push("mega-project-backend","${params.BACKEND_DOCKER_TAG}","rakib73520") 
+                    docker_push("mega-project-frontend","${params.FRONTEND_DOCKER_TAG}","rakib73520")
                 }
             }
         }
@@ -119,7 +119,7 @@ pipeline {
     post{
         success{
             archiveArtifacts artifacts: '*.xml', followSymlinks: false
-            build job: "mega-CD", parameters: [
+            build job: "mega-project-CD", parameters: [
                 string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
                 string(name: 'BACKEND_DOCKER_TAG', value: "${params.BACKEND_DOCKER_TAG}")
             ],
