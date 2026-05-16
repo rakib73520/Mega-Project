@@ -1,6 +1,6 @@
 @Library('Shared') _
 pipeline {
-    agent {label 'Node'} # agent any; if you are running Jenkins on one (master) machine
+    agent any # agent any; if you are running Jenkins on one (master) machine
     
     parameters {
         string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Frontend Docker tag of the image built by the CI job')
@@ -19,7 +19,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script{
-                    code_checkout("https://github.com/bongodev/mega.git","main")
+                    code_checkout("https://github.com/rakib73520/Mega-Project.git","main")
                 }
             }
         }
@@ -39,13 +39,13 @@ pipeline {
                 script{
                     dir('kubernetes'){
                         sh """
-                            sed -i -e s/mega-backend-beta.*/mega-backend-beta:${params.BACKEND_DOCKER_TAG}/g backend.yaml
+                            sed -i -e s/mega-project-backend.*/mega-project-backend:${params.BACKEND_DOCKER_TAG}/g backend.yaml
                         """
                     }
                     
                     dir('kubernetes'){
                         sh """
-                            sed -i -e s/mega-frontend-beta.*/mega-frontend-beta:${params.FRONTEND_DOCKER_TAG}/g frontend.yaml
+                            sed -i -e s/mega-project-frontend.*/mega-project-frontend:${params.FRONTEND_DOCKER_TAG}/g frontend.yaml
                         """
                     }
                     
@@ -56,7 +56,7 @@ pipeline {
         stage("Git: Code update and push to GitHub"){
             steps{
                 script{
-                    withCredentials([gitUsernamePassword(credentialsId: 'Github-cred', gitToolName: 'Default')]) {
+                    withCredentials([gitUsernamePassword(credentialsId: 'github-creds', gitToolName: 'Default')]) {
                         sh '''
                         echo "Checking repository status: "
                         git status
@@ -68,58 +68,10 @@ pipeline {
                         git commit -m "Updated environment variables"
                         
                         echo "Pushing changes to github: "
-                        git push https://github.com/bongodev/mega.git main
+                        git push https://github.com/rakib73520/Mega-Project.git main
                     '''
                     }
                 }
             }
         }
     }
-  post {
-        success {
-            script {
-                emailext attachLog: true,
-                from: 'bongodevbootcamp@gmail.com',
-                subject: "Mega project Application has been updated and deployed - '${currentBuild.result}'",
-                body: """
-                    <html>
-                    <body>
-                        <div style="background-color:rgb(122, 255, 126); padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">Project: ${env.JOB_NAME}</p>
-                        </div>
-                        <div style="background-color:rgb(174, 140, 38); padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
-                        </div>
-                        <div style="background-color:rgb(217, 98, 238); padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">URL: ${env.BUILD_URL}</p>
-                        </div>
-                    </body>
-                    </html>
-            """,
-            to: 'bongodevbootcamp@gmail.com',
-            mimeType: 'text/html'
-            }
-        }
-      failure {
-            script {
-                emailext attachLog: true,
-                from: 'bongodevbootcamp@gmail.com',
-                subject: "MegaProject Application build failed - '${currentBuild.result}'",
-                body: """
-                    <html>
-                    <body>
-                        <div style="background-color: #FFA07A; padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">Project: ${env.JOB_NAME}</p>
-                        </div>
-                        <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
-                        </div>
-                    </body>
-                    </html>
-            """,
-            to: 'bongodevbootcamp@gmail.com',
-            mimeType: 'text/html'
-            }
-        }
-    }
-}
