@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: rakib73520/mega-project-backend:latest
+          image: rakib73520/mega-project-backend:v3
           ports:
             - containerPort: 8080
 ---

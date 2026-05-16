@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: rakib73520/mega-project-frontend:latest
+          image: rakib73520/mega-project-frontend:v3
           ports:
             - containerPort: 5173
 ---
